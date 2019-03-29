@@ -52,7 +52,7 @@ int main(){
   addArrow(digraph, 3, 4, 7);
   addArrow(digraph, 5, 4, 6);
 
-  displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4));
+  //displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4));
   return 0;
 }
 
