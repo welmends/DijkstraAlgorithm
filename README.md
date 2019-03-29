@@ -26,6 +26,8 @@ Here we tell how to run this program
 ./ep1.o
 ```
 
+- Input...
+
 #### Behavior
 For an input as follows:
 
