@@ -52,6 +52,8 @@ int main(){
   addArrow(digraph, 3, 4, 7);
   addArrow(digraph, 5, 4, 6);
 
+  delArrow(digraph, 3, 4);
+
   displayDigraph(digraph);
 
   //displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4));
@@ -211,7 +213,7 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
   }
 }
 DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost){
-  //Declare uma variavel para indice do source na lista conectada
+  //Declare uma variavel para indice do source e target na lista conectada
   DWORD source=-1, target=-1;
 
   //Verifique se os vertices (s e t) existem no Digrafo
@@ -322,7 +324,7 @@ DWORD delVertice(Digraph *digraph, DWORD currVertice){
         free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
       }
       digraph->verticeSize--;//Decremente a quantidade de vertices
-      digraph->arrowSize -= digraph->arrowsSizes[v];//Decremente a quantidade de arestas
+      digraph->arrowSize -= digraph->arrowsSizes[v];//Subtraia a quantidade de arcos do digrafo
 
       free(digraph->connectedList);//Desaloque a lista conectada
       free(digraph->vertices);//Desaloque o vetor de vertices
@@ -347,6 +349,65 @@ DWORD delVertice(Digraph *digraph, DWORD currVertice){
   return 1;//Saia da funcao
 }
 DWORD delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice){
-  //Implement...
-  return 0;
+  //Declare uma variavel para indice do source e target na lista conectada
+  DWORD source=-1, target=-1;
+
+  //Verifique se o arco (s,t) existe no Digrafo
+  source = getVertice(digraph, sourceVertice);
+  if(source!=-1){
+    for(i=0; i<digraph->arrowsSizes[source]; i++){
+      if(digraph->connectedList[source][i].target==targetVertice){
+        target = i;
+        break;
+      }
+    }
+  }
+
+  //Se existir o arco (s,t)
+  if(source!=-1 && target!=-1){
+    //Declare variaveis auxiliares para a realocacao de memoria para deletar um vertice
+    Arrow ** aux;
+    DWORD iAux;
+
+    //Aloque memoria para a lista conectada
+    aux = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));
+    if(aux!=NULL){
+      //Passe os vertices (menos o arco que deseja deletar para aux)
+      iAux = 0;
+      for(i=0; i<digraph->verticeSize; i++){
+        //Lista conectada
+        if(i==source){
+          aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i]-1, sizeof(Arrow));
+        }else{
+          aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
+        }
+        for(j=0; j<digraph->arrowsSizes[i]; j++){
+          if(!(i==source && j==target)){
+            aux[iAux][j].target = digraph->connectedList[i][j].target;
+            aux[iAux][j].cost = digraph->connectedList[i][j].cost;
+          }
+        }
+        //Incremente o iAux
+        iAux++;
+        free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
+      }
+      digraph->arrowSize--;//Decremente a quantidade de arcos do digrafo
+      digraph->arrowsSizes[source]--;//Decremente a quantidade de arcos do vertice 'source'
+
+      free(digraph->connectedList);//Desaloque a lista conectada
+
+      digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
+      if(digraph->connectedList!=NULL){
+        //Passe as referencias para a variavel original
+        digraph->connectedList = aux;
+      }else{
+        return 0;//Saia da funcao sem conseguir deletar o vertice
+      }
+    }else{
+      return 0;//Saia da funcao sem conseguir deletar o vertice
+    }
+  }else{
+    return 0;//Saia da funcao sem conseguir deletar o vertice
+  }
+  return 1;//Saia da funcao
 }
