@@ -35,10 +35,10 @@ bool isInBorder(DWORD *Z, DWORD sizeZ, DWORD vertice);
 void initDigraph(Digraph **digraph);
 void displayDigraph(Digraph *digraph);
 DWORD getVertice(Digraph *digraph, DWORD verticeName);
-DWORD addVertice(Digraph *digraph, DWORD newVertice);
-DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost);
-DWORD delVertice(Digraph *digraph, DWORD currVertice);
-DWORD delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice);
+void addVertice(Digraph *digraph, DWORD newVertice);
+void addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost);
+void delVertice(Digraph *digraph, DWORD currVertice);
+void delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice);
 
 int main(){
   Digraph *digraph;
@@ -99,6 +99,11 @@ void initMinimumPath(MinimumPath **minimumPath, DWORD verticeSize){
   //Aloque memoria para os vetores
   (*minimumPath)->d = (DWORD *)calloc((*minimumPath)->size, sizeof(DWORD));
   (*minimumPath)->previous = (DWORD *)calloc((*minimumPath)->size, sizeof(DWORD));
+  //Verifique a alocacao de memoria
+  if(*minimumPath==NULL || (*minimumPath)->d==NULL || (*minimumPath)->previous==NULL){
+    printf("Error [void initMinimumPath]: No memory");
+    exit(-1);
+  }
 }
 void displayMinimumPath(MinimumPath *minimumPath){
   //Implement...
@@ -124,6 +129,11 @@ void initDigraph(Digraph **digraph){
   *digraph  = (Digraph *)calloc(1, sizeof(Digraph));
   //Inicialize o Digrafo
   **digraph = (Digraph){NULL, NULL, NULL, 0, 0};
+  //Verifique a alocacao de memoria
+  if(*digraph==NULL){
+    printf("Error [void initDigraph]: No memory");
+    exit(-1);
+  }
 }
 void displayDigraph(Digraph *digraph){
   //Mostre o digrafo no modelo proposto
@@ -143,34 +153,31 @@ DWORD getVertice(Digraph *digraph, DWORD verticeName){
   }
   return -1;//Se nao, retorne -1
 }
-DWORD addVertice(Digraph *digraph, DWORD newVertice){
+void addVertice(Digraph *digraph, DWORD newVertice){
   if(digraph->verticeSize==0){
     //Se nao houver vertices adicione o primeiro
     //Aloque memoria para a lista conectada
     digraph->connectedList = (Arrow **)calloc(1,sizeof(Arrow *));
-    if(digraph->connectedList!=NULL){
-      //Aloque memoria para o vetor de vertices (nome do vertice)
-      digraph->vertices = (DWORD *)calloc(1,sizeof(DWORD));
-      //Aloque memoria para o vetor de tamanhos de arcos (das listas conectadas)
-      digraph->arrowsSizes = (DWORD *)calloc(1,sizeof(DWORD));
-      if(digraph->vertices!=NULL && digraph->arrowsSizes!=NULL){
-        //Adicione o vertice
-        digraph->vertices[digraph->verticeSize] = newVertice;
-        //Coloque a quantidade de arcos daquele vertice para 0
-        digraph->arrowsSizes[digraph->verticeSize] = 0;
-        //Incremente o tamanho de vertices do digrafo
-        digraph->verticeSize = 1;
-      }else{
-        return 0;//Saia da funcao sem conseguir adicionar o vertice
-      }
-      return 1;//Saia da funcao
-    }else{
-      return 0;//Saia da funcao sem conseguir adicionar o vertice
+    //Aloque memoria para o vetor de vertices (nome do vertice)
+    digraph->vertices = (DWORD *)calloc(1,sizeof(DWORD));
+    //Aloque memoria para o vetor de tamanhos de arcos (das listas conectadas)
+    digraph->arrowsSizes = (DWORD *)calloc(1,sizeof(DWORD));
+    //Verifique a alocacao de memoria
+    if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
+      printf("Error [void addVertice]: No memory");
+      exit(-1);
     }
+
+    //Adicione o vertice
+    digraph->vertices[digraph->verticeSize] = newVertice;
+    //Coloque a quantidade de arcos daquele vertice para 0
+    digraph->arrowsSizes[digraph->verticeSize] = 0;
+    //Incremente o tamanho de vertices do digrafo
+    digraph->verticeSize = 1;
   }else{
     //Verifique se ja existe esse vertice
     if(getVertice(digraph, newVertice)!=-1){
-      return 0;//Se sim, saia da funcao sem conseguir adicionar o vertice
+      return;//Se sim, saia da funcao sem conseguir adicionar o vertice
     }
 
     //Declare variaveis auxiliares para a realocacao de memoria para adicionar um novo vertice
@@ -178,63 +185,73 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
     DWORD * aux1, * aux2;
     DWORD iAux;
     bool hasBeenAdded = false;
+
     //Aloque memoria para a lista conectada e os vertores de vertice e tamanhos de arco
     aux = (Arrow **)calloc(digraph->verticeSize+1, sizeof(Arrow *));
     aux1 = (DWORD *)calloc(digraph->verticeSize+1, sizeof(DWORD));
     aux2 = (DWORD *)calloc(digraph->verticeSize+1, sizeof(DWORD));
-    if(aux!=NULL && aux1!=NULL && aux2!=NULL){
-      //Passe os vertices
-      iAux = 0;
-      for(i=0; i<digraph->verticeSize+1; i++){
-        if(!hasBeenAdded && (digraph->vertices[iAux]>newVertice || i==digraph->verticeSize)){
-          //Adicione o vertice
-          aux1[i] = newVertice;
-          //Coloque a quantidade de arcos daquele vertice para 0
-          aux2[i] = 0;
-          //Coloque hasBeenAdded para verdadeiro
-          hasBeenAdded = true;
-        }else{
-          //Lista conectada
-          aux[i] = (Arrow *)calloc(digraph->arrowsSizes[iAux], sizeof(Arrow));
-          for(j=0; j<digraph->arrowsSizes[iAux]; j++){
-            aux[i][j].target = digraph->connectedList[iAux][j].target;
-            aux[i][j].cost = digraph->connectedList[iAux][j].cost;
-          }
-          //Vetor de vertices
-          aux1[i] = digraph->vertices[iAux];
-          //Vetor de tamanho de arcos
-          aux2[i] = digraph->arrowsSizes[iAux];
-          //Desaloque um vertice da lista conectada
-          free(digraph->connectedList[iAux]);
-          //Incremente o iAux
-          iAux++;
-        }
-      }
-      digraph->verticeSize++;//Incremente a quantidade de vertices
-
-      free(digraph->connectedList);//Desaloque a lista conectada
-      free(digraph->vertices);//Desaloque o vetor de vertices
-      free(digraph->arrowsSizes);//Desaloque o vetor de tamanho de arcos
-
-      digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
-      digraph->vertices = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para o vetor de vertices
-      digraph->arrowsSizes = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para o vetor de tamanhos de arcos
-
-      if(digraph->connectedList!=NULL && digraph->vertices!=NULL && digraph->arrowsSizes!=NULL){
-        //Passe as referencias para as variaveis originais
-        digraph->connectedList = aux;
-        digraph->vertices = aux1;
-        digraph->arrowsSizes = aux2;
-      }else{
-        return 0;//Saia da funcao sem conseguir deletar o vertice
-      }
-    }else{
-      return 0;//Saia da funcao sem conseguir deletar o vertice
+    //Verifique a alocacao de memoria
+    if(aux==NULL || aux1==NULL || aux2==NULL){
+      printf("Error [void addVertice]: No memory");
+      exit(-1);
     }
-    return 1;//Saia da funcao
+
+    //Passe os vertices
+    iAux = 0;
+    for(i=0; i<digraph->verticeSize+1; i++){
+      if(!hasBeenAdded && (digraph->vertices[iAux]>newVertice || i==digraph->verticeSize)){
+        //Adicione o vertice
+        aux1[i] = newVertice;
+        //Coloque a quantidade de arcos daquele vertice para 0
+        aux2[i] = 0;
+        //Coloque hasBeenAdded para verdadeiro
+        hasBeenAdded = true;
+      }else{
+        //Lista conectada
+        //Aloque memoria para um vertice da lista conectada
+        aux[i] = (Arrow *)calloc(digraph->arrowsSizes[iAux], sizeof(Arrow));
+        //Verifique a alocacao de memoria
+        if(aux[i]==NULL){
+          printf("Error [void addVertice]: No memory");
+          exit(-1);
+        }
+
+        for(j=0; j<digraph->arrowsSizes[iAux]; j++){
+          aux[i][j].target = digraph->connectedList[iAux][j].target;
+          aux[i][j].cost = digraph->connectedList[iAux][j].cost;
+        }
+        //Vetor de vertices
+        aux1[i] = digraph->vertices[iAux];
+        //Vetor de tamanho de arcos
+        aux2[i] = digraph->arrowsSizes[iAux];
+        //Desaloque um vertice da lista conectada
+        free(digraph->connectedList[iAux]);
+        //Incremente o iAux
+        iAux++;
+      }
+    }
+    digraph->verticeSize++;//Incremente a quantidade de vertices
+
+    free(digraph->connectedList);//Desaloque a lista conectada
+    free(digraph->vertices);//Desaloque o vetor de vertices
+    free(digraph->arrowsSizes);//Desaloque o vetor de tamanho de arcos
+
+    digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
+    digraph->vertices = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para o vetor de vertices
+    digraph->arrowsSizes = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para o vetor de tamanhos de arcos
+    //Verifique a alocacao de memoria
+    if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
+      printf("Error [void addVertice]: No memory");
+      exit(-1);
+    }
+
+    //Passe as referencias para as variaveis originais
+    digraph->connectedList = aux;
+    digraph->vertices = aux1;
+    digraph->arrowsSizes = aux2;
   }
 }
-DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost){
+void addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost){
   //Declare uma variavel para indice do source e target na lista conectada
   DWORD source=-1, target=-1;
   addVertice(digraph, sourceVertice);
@@ -248,7 +265,7 @@ DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD
     if(digraph->connectedList[source][i].target==targetVertice){
       target = i;
       digraph->connectedList[source][target].cost = cost;
-      return 1;//Saia da funcao atualizando o custo do arco ja existente
+      return;//Saia da funcao atualizando o custo do arco ja existente
     }
   }
 
@@ -257,40 +274,43 @@ DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD
     //Se nao houver arcos neste vertice adicione o primeiro
     //Aloque memoria para um vertice da lista conectada
     digraph->connectedList[source] = (Arrow *)calloc(1,sizeof(Arrow));
-    if(digraph->connectedList[source]!=NULL){
-      //Adicione o arco
-      digraph->connectedList[source][0].target = targetVertice;
-      digraph->connectedList[source][0].cost = cost;
-      //Coloque a quantidade de arcos daquele vertice para 1
-      digraph->arrowsSizes[source] = 1;
-      //Incremente o tamanho de arcos do digrafo
-      digraph->arrowSize++;
-    }else{
-      return 0;//Saia da funcao sem conseguir adicionar o arco
+    //Verifique a alocacao de memoria
+    if(digraph->connectedList[source]==NULL){
+      printf("Error [void addArrow]: No memory");
+      exit(-1);
     }
+
+    //Adicione o arco
+    digraph->connectedList[source][0].target = targetVertice;
+    digraph->connectedList[source][0].cost = cost;
+    //Coloque a quantidade de arcos daquele vertice para 1
+    digraph->arrowsSizes[source] = 1;
+    //Incremente o tamanho de arcos do digrafo
+    digraph->arrowSize++;
   }else{
     //Declare variaveis auxiliares para a realocacao de memoria para adicionar um novo arco
     Arrow * aux;
 
     //Realoque memoria para uma lista conectada
     aux = (Arrow *)realloc(digraph->connectedList[source], (digraph->arrowsSizes[source]+1)*sizeof(Arrow));
-    if(aux!=NULL){
-      digraph->connectedList[source] = aux;//Passe a referencia para a variavel original
-      digraph->connectedList[source][digraph->arrowsSizes[source]].target = targetVertice;//Adicione o target
-      digraph->connectedList[source][digraph->arrowsSizes[source]].cost = cost;//Adicione o custo
-      digraph->arrowsSizes[source]++;//Incremente a quantidade de arcos do vertice source
-      digraph->arrowSize++;//Incremente a quantidade de arcos do Digrafo
-    }else{
-      return 0;//Saia da funcao sem conseguir adicionar o arco
+    //Verifique a alocacao de memoria
+    if(aux==NULL){
+      printf("Error [void addArrow]: No memory");
+      exit(-1);
     }
+
+    digraph->connectedList[source] = aux;//Passe a referencia para a variavel original
+    digraph->connectedList[source][digraph->arrowsSizes[source]].target = targetVertice;//Adicione o target
+    digraph->connectedList[source][digraph->arrowsSizes[source]].cost = cost;//Adicione o custo
+    digraph->arrowsSizes[source]++;//Incremente a quantidade de arcos do vertice source
+    digraph->arrowSize++;//Incremente a quantidade de arcos do Digrafo
   }
-  return 1;//Saia da funcao
 }
-DWORD delVertice(Digraph *digraph, DWORD currVertice){
+void delVertice(Digraph *digraph, DWORD currVertice){
   //Verifique se ja existe esse vertice
   DWORD v = getVertice(digraph, currVertice);
   if(v==-1){
-    return 0;//Saia da funcao sem conseguir deletar o vertice
+    return;//Saia da funcao sem conseguir deletar o vertice
   }else{
     //Declare variaveis auxiliares para a realocacao de memoria para deletar um vertice
     Arrow ** aux;
@@ -301,52 +321,61 @@ DWORD delVertice(Digraph *digraph, DWORD currVertice){
     aux = (Arrow **)calloc(digraph->verticeSize-1, sizeof(Arrow *));
     aux1 = (DWORD *)calloc(digraph->verticeSize-1, sizeof(DWORD));
     aux2 = (DWORD *)calloc(digraph->verticeSize-1, sizeof(DWORD));
-    if(aux!=NULL && aux1!=NULL && aux2!=NULL){
-      //Passe os vertices (menos o que deseja deletar para aux)
-      iAux = 0;
-      for(i=0; i<digraph->verticeSize; i++){
-        if(i!=v){
-          //Lista conectada
-          aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
-          for(j=0; j<digraph->arrowsSizes[i]; j++){
-            aux[iAux][j].target = digraph->connectedList[i][j].target;
-            aux[iAux][j].cost = digraph->connectedList[i][j].cost;
-          }
-          //Vetor de vertices
-          aux1[iAux] = digraph->vertices[i];
-          //Vetor de tamanho de arcos
-          aux2[iAux] = digraph->arrowsSizes[i];
-          //Incremente o iAux
-          iAux++;
-        }
-        free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
-      }
-      digraph->verticeSize--;//Decremente a quantidade de vertices
-      digraph->arrowSize -= digraph->arrowsSizes[v];//Subtraia a quantidade de arcos do digrafo
-
-      free(digraph->connectedList);//Desaloque a lista conectada
-      free(digraph->vertices);//Desaloque o vetor de vertices
-      free(digraph->arrowsSizes);//Desaloque o vetor de tamanho de arcos
-
-      digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
-      digraph->vertices = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para a lista conectada
-      digraph->arrowsSizes = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para a lista conectada
-
-      if(digraph->connectedList!=NULL && digraph->vertices!=NULL && digraph->arrowsSizes!=NULL){
-        //Passe as referencias para as variaveis originais
-        digraph->connectedList = aux;
-        digraph->vertices = aux1;
-        digraph->arrowsSizes = aux2;
-      }else{
-        return 0;//Saia da funcao sem conseguir deletar o vertice
-      }
-    }else{
-      return 0;//Saia da funcao sem conseguir deletar o vertice
+    //Verifique a alocacao de memoria
+    if(aux==NULL || aux1==NULL || aux2==NULL){
+      printf("Error [void delVertice]: No memory");
+      exit(-1);
     }
+
+    //Passe os vertices (menos o que deseja deletar para aux)
+    iAux = 0;
+    for(i=0; i<digraph->verticeSize; i++){
+      if(i!=v){
+        //Lista conectada
+        //Aloque memoria para um vertice da lista conectada
+        aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
+        //Verifique a alocacao de memoria
+        if(aux[i]==NULL){
+          printf("Error [void delVertice]: No memory");
+          exit(-1);
+        }
+
+        for(j=0; j<digraph->arrowsSizes[i]; j++){
+          aux[iAux][j].target = digraph->connectedList[i][j].target;
+          aux[iAux][j].cost = digraph->connectedList[i][j].cost;
+        }
+        //Vetor de vertices
+        aux1[iAux] = digraph->vertices[i];
+        //Vetor de tamanho de arcos
+        aux2[iAux] = digraph->arrowsSizes[i];
+        //Incremente o iAux
+        iAux++;
+      }
+      free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
+    }
+    digraph->verticeSize--;//Decremente a quantidade de vertices
+    digraph->arrowSize -= digraph->arrowsSizes[v];//Subtraia a quantidade de arcos do digrafo
+
+    free(digraph->connectedList);//Desaloque a lista conectada
+    free(digraph->vertices);//Desaloque o vetor de vertices
+    free(digraph->arrowsSizes);//Desaloque o vetor de tamanho de arcos
+
+    digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
+    digraph->vertices = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para a lista conectada
+    digraph->arrowsSizes = (DWORD *)calloc(digraph->verticeSize, sizeof(DWORD));//Aloque memoria novamente para a lista conectada
+    //Verifique a alocacao de memoria
+    if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
+      printf("Error [void delVertice]: No memory");
+      exit(-1);
+    }
+
+    //Passe as referencias para as variaveis originais
+    digraph->connectedList = aux;
+    digraph->vertices = aux1;
+    digraph->arrowsSizes = aux2;
   }
-  return 1;//Saia da funcao
 }
-DWORD delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice){
+void delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice){
   //Declare uma variavel para indice do source e target na lista conectada
   DWORD source=-1, target=-1;
 
@@ -369,43 +398,50 @@ DWORD delArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice){
 
     //Aloque memoria para a lista conectada
     aux = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));
-    if(aux!=NULL){
-      //Passe os vertices (menos o arco que deseja deletar para aux)
-      iAux = 0;
-      for(i=0; i<digraph->verticeSize; i++){
-        //Lista conectada
-        if(i==source){
-          aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i]-1, sizeof(Arrow));
-        }else{
-          aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
-        }
-        for(j=0; j<digraph->arrowsSizes[i]; j++){
-          if(!(i==source && j==target)){
-            aux[iAux][j].target = digraph->connectedList[i][j].target;
-            aux[iAux][j].cost = digraph->connectedList[i][j].cost;
-          }
-        }
-        //Incremente o iAux
-        iAux++;
-        free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
-      }
-      digraph->arrowSize--;//Decremente a quantidade de arcos do digrafo
-      digraph->arrowsSizes[source]--;//Decremente a quantidade de arcos do vertice 'source'
-
-      free(digraph->connectedList);//Desaloque a lista conectada
-
-      digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
-      if(digraph->connectedList!=NULL){
-        //Passe as referencias para a variavel original
-        digraph->connectedList = aux;
-      }else{
-        return 0;//Saia da funcao sem conseguir deletar o vertice
-      }
-    }else{
-      return 0;//Saia da funcao sem conseguir deletar o vertice
+    //Verifique a alocacao de memoria
+    if(aux==NULL){
+      printf("Error [void delArrow]: No memory");
+      exit(-1);
     }
-  }else{
-    return 0;//Saia da funcao sem conseguir deletar o vertice
+
+    //Passe os vertices (menos o arco que deseja deletar para aux)
+    iAux = 0;
+    for(i=0; i<digraph->verticeSize; i++){
+      //Lista conectada
+      if(i==source){
+        aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i]-1, sizeof(Arrow));
+      }else{
+        aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
+      }
+      //Verifique a alocacao de memoria
+      if(aux[iAux]==NULL){
+        printf("Error [void delArrow]: No memory");
+        exit(-1);
+      }
+
+      for(j=0; j<digraph->arrowsSizes[i]; j++){
+        if(!(i==source && j==target)){
+          aux[iAux][j].target = digraph->connectedList[i][j].target;
+          aux[iAux][j].cost = digraph->connectedList[i][j].cost;
+        }
+      }
+      //Incremente o iAux
+      iAux++;
+      free(digraph->connectedList[i]);//Desaloque um vertice da lista conectada
+    }
+    digraph->arrowSize--;//Decremente a quantidade de arcos do digrafo
+    digraph->arrowsSizes[source]--;//Decremente a quantidade de arcos do vertice 'source'
+
+    free(digraph->connectedList);//Desaloque a lista conectada
+
+    digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));//Aloque memoria novamente para a lista conectada
+    //Verifique a alocacao de memoria
+    if(digraph->connectedList==NULL){
+      printf("Error [void delArrow]: No memory");
+      exit(-1);
+    }
+
+    //Passe as referencias para a variavel original
+    digraph->connectedList = aux;
   }
-  return 1;//Saia da funcao
 }
