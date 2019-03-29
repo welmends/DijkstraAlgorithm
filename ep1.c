@@ -48,9 +48,9 @@ int main(){
   addArrow(digraph, 1, 5, 10);
   addArrow(digraph, 2, 3, 4);
   addArrow(digraph, 2, 4, 13);
-  // addArrow(digraph, 2, 5, 2);
-  // addArrow(digraph, 3, 4, 7);
-  // addArrow(digraph, 5, 4, 6);
+  addArrow(digraph, 2, 5, 2);
+  addArrow(digraph, 3, 4, 7);
+  addArrow(digraph, 5, 4, 6);
 
   displayDigraph(digraph);
 
@@ -159,7 +159,7 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
         //Coloque a quantidade de arcos daquele vertice para 0
         digraph->arrowsSizes[digraph->verticeSize] = 0;
         //Incremente o tamanho de vertices do digrafo
-        digraph->verticeSize++;
+        digraph->verticeSize = 1;
       }else{
         return 0;//Saia da funcao sem conseguir adicionar o vertice
       }
@@ -186,7 +186,7 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
       //Passe os vertices
       iAux = 0;
       for(i=0; i<digraph->verticeSize+1; i++){
-        if(digraph->vertices[iAux]>newVertice || (i==digraph->verticeSize && !hasBeenAdded)){
+        if(!hasBeenAdded && (digraph->vertices[iAux]>newVertice || i==digraph->verticeSize)){
           //Adicione o vertice
           aux1[i] = newVertice;
           //Coloque a quantidade de arcos daquele vertice para 0
@@ -204,9 +204,10 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
           aux1[i] = digraph->vertices[iAux];
           //Vetor de tamanho de arcos
           aux2[i] = digraph->arrowsSizes[iAux];
+          //Desaloque um vertice da lista conectada
+          free(digraph->connectedList[iAux]);
           //Incremente o iAux
           iAux++;
-          free(digraph->connectedList[iAux]);//Desaloque um vertice da lista conectada
         }
       }
       digraph->verticeSize++;//Incremente a quantidade de vertices
@@ -236,55 +237,18 @@ DWORD addVertice(Digraph *digraph, DWORD newVertice){
 DWORD addArrow(Digraph *digraph, DWORD sourceVertice, DWORD targetVertice, DWORD cost){
   //Declare uma variavel para indice do source e target na lista conectada
   DWORD source=-1, target=-1;
+  addVertice(digraph, sourceVertice);
+  addVertice(digraph, targetVertice);
 
-  //Verifique se os vertices (s e t) existem no Digrafo
-  j=0;
-  for(i=0; i<digraph->verticeSize; i++){
-    if(digraph->vertices[i]==sourceVertice){
-      source = i;
-      j++;
-    }
-    if(digraph->vertices[i]==targetVertice){
-      target = i;
-      j++;
-    }
-    if(j==2){
-      break;//Se sim, continue
-    }
-  }
-  if(j<2){
-    if(source==-1){
-      addVertice(digraph, sourceVertice);
-    }
-    if(target==-1){
-      addVertice(digraph, targetVertice);
-    }
-  }
-  j=0;
-  for(i=0; i<digraph->verticeSize; i++){
-    if(digraph->vertices[i]==sourceVertice){
-      source = i;
-      j++;
-    }
-    if(digraph->vertices[i]==targetVertice){
-      target = i;
-      j++;
-    }
-    if(j==2){
-      break;//Se sim, continue
-    }
-  }
+  //Verifique se o arco (s,t) existe no Digrafo
+  source = getVertice(digraph, sourceVertice);
+  target = getVertice(digraph, targetVertice);
 
-  //Verifique se ja existe o arco
-  for(i=0; i<digraph->verticeSize; i++){
-    if(digraph->vertices[i]==sourceVertice){
-      for(j=0; j<digraph->arrowsSizes[i]; j++){
-        if(digraph->connectedList[i][j].target==targetVertice){
-          digraph->connectedList[i][j].cost=cost;//Se sim, atualize o custo
-          return 1;//E saia da funcao
-        }
-      }
-      i=digraph->verticeSize-1;//Nao iterar desnecessariamente
+  for(i=0; i<digraph->arrowsSizes[source]; i++){
+    if(digraph->connectedList[source][i].target==targetVertice){
+      target = i;
+      digraph->connectedList[source][target].cost = cost;
+      return 1;//Saia da funcao atualizando o custo do arco ja existente
     }
   }
 
