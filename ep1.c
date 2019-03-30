@@ -1,3 +1,8 @@
+//TODO
+// - Add constraints
+// - See a better structure (put all in digraph)
+// - optimize the code
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -30,7 +35,7 @@ int i, j, z;
 MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target);
 
 void initMinimumPath(MinimumPath **digraph, DWORD verticeSize, DWORD source, DWORD target);
-void displayMinimumPath(MinimumPath *minimumPath);
+void displayMinimumPath(MinimumPath *minimumPath, bool showVectors);
 bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, DWORD *Z, DWORD *u, DWORD *v);
 
 void initDigraph(Digraph **digraph);
@@ -46,39 +51,37 @@ int main(){
   Digraph *digraph;
   initDigraph(&digraph);
 
-  // addArrow(digraph, 1, 2, 5);
-  // addArrow(digraph, 1, 5, 10);
-  // addArrow(digraph, 2, 3, 4);
-  // addArrow(digraph, 2, 4, 13);
-  // addArrow(digraph, 2, 5, 2);
-  // addArrow(digraph, 3, 4, 7);
-  // addArrow(digraph, 5, 4, 6);
-  //
-  // displayDigraph(digraph);
-  // displayMinimumPath(dijkstraAlgorithm(digraph, 1, 10));
-
-  addArrow(digraph, 1, 2, 0);
-  addArrow(digraph, 1, 3, 4);
-  addArrow(digraph, 1, 4, 1);
+  //**** Graph 1 (s=1, t=4)
+  addArrow(digraph, 1, 2, 5);
+  addArrow(digraph, 1, 5, 10);
   addArrow(digraph, 2, 3, 4);
-  addArrow(digraph, 2, 5, 5);
-  addArrow(digraph, 2, 6, 5);
-  addArrow(digraph, 3, 6, 1);
-  addArrow(digraph, 4, 3, 3);
-  addArrow(digraph, 4, 7, 1);
-  addArrow(digraph, 5, 8, 1);
-  addArrow(digraph, 6, 5, 0);
-  addArrow(digraph, 6, 8, 2);
-  addArrow(digraph, 6, 9, 3);
-  addArrow(digraph, 7, 3, 1);
-  addArrow(digraph, 7, 6, 3);
-  addArrow(digraph, 7, 9, 5);
-  addArrow(digraph, 8, 9, 1);
-  addArrow(digraph, 8, 10, 3);
-  addArrow(digraph, 9, 10, 1);
+  addArrow(digraph, 2, 4, 13);
+  addArrow(digraph, 2, 5, 2);
+  addArrow(digraph, 3, 4, 7);
+  addArrow(digraph, 5, 4, 6);
+  //**** Graph 2 (s=1, t=10)
+  // addArrow(digraph, 1, 2, 0);
+  // addArrow(digraph, 1, 3, 4);
+  // addArrow(digraph, 1, 4, 1);
+  // addArrow(digraph, 2, 3, 4);
+  // addArrow(digraph, 2, 5, 5);
+  // addArrow(digraph, 2, 6, 5);
+  // addArrow(digraph, 3, 6, 1);
+  // addArrow(digraph, 4, 3, 3);
+  // addArrow(digraph, 4, 7, 1);
+  // addArrow(digraph, 5, 8, 1);
+  // addArrow(digraph, 6, 5, 0);
+  // addArrow(digraph, 6, 8, 2);
+  // addArrow(digraph, 6, 9, 3);
+  // addArrow(digraph, 7, 3, 1);
+  // addArrow(digraph, 7, 6, 3);
+  // addArrow(digraph, 7, 9, 5);
+  // addArrow(digraph, 8, 9, 1);
+  // addArrow(digraph, 8, 10, 3);
+  // addArrow(digraph, 9, 10, 1);
 
-  //displayDigraph(digraph);
-  displayMinimumPath(dijkstraAlgorithm(digraph, 1, 10));
+  displayDigraph(digraph);
+  displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4), false);
 
   return 0;
 }
@@ -87,6 +90,7 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   //Declare ponteiro da struct DijkstraMinimumPath
   MinimumPath *minimumPath;
   initMinimumPath(&minimumPath, digraph->verticeSize, source, target);//init
+
   //Declare e aloque um vetor Z (fronteira)
   DWORD Z[digraph->verticeSize+1];
 
@@ -100,18 +104,23 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   *Z = 1;
   //Coloque source na fronteira
   Z[*Z] = minimumPath->source;
+
   //Coloque d[0] = 0
   minimumPath->d[0] = 0;
 
   //Verifique se existe arco na fronteira se existir pegue o de menor custo
   DWORD u, v;
   while(getMinimumCostArrowInBorder(digraph, minimumPath, Z, &u, &v)){
+    //Coloque v na fronteira
     (*Z)++;
     Z[*Z] = v;
 
+    //Calcule o novo custo de s para v
     minimumPath->d[v-1] = minimumPath->d[u-1]+getArrow(digraph, u, v).cost;
+    //Atualize o vetor de anteriores
     minimumPath->previous[v-1] = u;
 
+    //Se chegar no target saia do laco
     if(minimumPath->target==v){
       break;
     }
@@ -133,9 +142,9 @@ void initMinimumPath(MinimumPath **minimumPath, DWORD verticeSize, DWORD source,
     exit(-1);
   }
 }
-void displayMinimumPath(MinimumPath *minimumPath){
+void displayMinimumPath(MinimumPath *minimumPath, bool showVectors){
   if(minimumPath->previous[minimumPath->target-1]==0){
-    printf("Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
+    printf("> Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
     return;
   }
 
@@ -167,7 +176,7 @@ void displayMinimumPath(MinimumPath *minimumPath){
     }
   }
 
-  printf("Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
+  printf("> Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
   for(i=0; i<j; i++){
     printf("[%d]",minPath[i]);
     if(i==j-1){
@@ -177,19 +186,21 @@ void displayMinimumPath(MinimumPath *minimumPath){
     }
   }
 
-  printf("\n  d  -> ");
-  for(i=0; i<minimumPath->size; i++){
-    printf("[%d]", minimumPath->d[i]);
+  if(showVectors){
+    printf("\n  d  -> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", minimumPath->d[i]);
+    }
+    printf("\nprev -> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", minimumPath->previous[i]);
+    }
+    printf("\nindex-> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", i+1);
+    }
+    printf("\n");
   }
-  printf("\nprev -> ");
-  for(i=0; i<minimumPath->size; i++){
-    printf("[%d]", minimumPath->previous[i]);
-  }
-  printf("\nindex-> ");
-  for(i=0; i<minimumPath->size; i++){
-    printf("[%d]", i+1);
-  }
-  printf("\n");
 }
 bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, DWORD *Z, DWORD *u, DWORD *v){
   DWORD min=-1, minAux, uAux, vAux, uIndex, vIndex;
@@ -246,6 +257,7 @@ void initDigraph(Digraph **digraph){
 }
 void displayDigraph(Digraph *digraph){
   //Mostre o digrafo de acordo com o modelo proposto
+  printf("> Digraph:\n");
   printf("%d %d\n", digraph->verticeSize, digraph->arrowSize);
   for(i=0; i<digraph->verticeSize; i++){
     for(j=0; j<digraph->arrowsSizes[i]; j++){
