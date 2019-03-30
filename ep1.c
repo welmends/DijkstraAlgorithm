@@ -1,6 +1,4 @@
 //TODO
-// - Add input treatment
-// - Add constraints
 // - See a better structure (put all in digraph)
 // - optimize the code
 
@@ -298,9 +296,17 @@ void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
 
   file = fopen(argv[1], "r");
   fscanf(file, "%d %d %d %d", &vSize, &aSize, &*source, &*target);
+  if(*source==*target){
+    printf("Error [void inputDigraph]: source and target vertices are equal\n");
+    exit(-1);
+  }
   while(fgetc(file) != EOF){
     fscanf(file, "%d %d %d", &u, &v, &cost);
     addArrow(digraph, u, v, cost);
+    if(u==v){
+      printf("Error [void inputDigraph]: there is arrow from u to u, this code do not accept not simple graph\n");
+      exit(-1);
+    }
   }
   fclose(file);
 
@@ -486,6 +492,13 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
   //Verifique se o arco (s,t) existe no Digrafo
   source = getVertice(digraph, sourceVertice);
   target = getVertice(digraph, targetVertice);
+
+  for(i=0; i<digraph->arrowsSizes[target]; i++){
+    if(digraph->connectedList[target][i].target==sourceVertice){
+      printf("Error [void addArrow]: the input digraph has an arrow from u to v and from v to u, this code do not accept not simple digraph\n");
+      exit(-1);
+    }
+  }
 
   for(i=0; i<digraph->arrowsSizes[source]; i++){
     if(digraph->connectedList[source][i].target==targetVertice){
