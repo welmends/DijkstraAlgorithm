@@ -23,7 +23,7 @@ Here we tell how to run this program
 - Call the executable by typing at terminal on project folder
 
 ```shell
-./ep1.o 'path_to_txtFile.txt'
+./ep1.o '<path_to_txtFile>/filename.txt'
 ```
 
 - The .txt file must have the following pattern
