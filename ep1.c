@@ -85,7 +85,6 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
     Z[sizeZ] = v;
     sizeZ++;
 
-    printf("%d %d %d\n", u, getArrow(digraph, u, v).target, getArrow(digraph, u, v).cost );
     minimumPath->d[v-1] = minimumPath->d[u-1]+getArrow(digraph, u, v).cost;
     minimumPath->previous[v-1] = u;
 
@@ -112,20 +111,45 @@ void initMinimumPath(MinimumPath **minimumPath, DWORD verticeSize, DWORD source,
   }
 }
 void displayMinimumPath(MinimumPath *minimumPath){
-  //Implement...
-  bool hasEnded = false;
-  DWORD currVertice = minimumPath->target;
-  printf("minimum path\n");
+  bool hasEnded;
+  DWORD currVertice;
+
+  hasEnded = false;
+  currVertice = minimumPath->target;
+  i=0;
+  currVertice = minimumPath->target;
   while(!hasEnded){
     if(currVertice==minimumPath->source){
-      printf("[%d]", currVertice);
       hasEnded = true;
     }else{
-      printf("[%d]<-", currVertice);
+      currVertice = minimumPath->previous[currVertice-1];
+    }
+    i++;
+  }
+
+  DWORD minPath[i];
+  hasEnded = false;
+  currVertice = minimumPath->target;
+  z=j=i;
+  while(!hasEnded){
+    minPath[--z]=currVertice;
+    if(currVertice==minimumPath->source){
+      hasEnded = true;
+    }else{
       currVertice = minimumPath->previous[currVertice-1];
     }
   }
-  printf("\n");
+
+  printf("Minimum Path [%d to %d]:\n", minimumPath->source, minimumPath->target);
+  for(i=0; i<j; i++){
+    printf("[%d]",minPath[i]);
+    if(i==j-1){
+      printf("\n");
+    }else{
+      printf("->");
+    }
+  }
+  
   printf("\n  d  -> ");
   for(i=0; i<minimumPath->size; i++){
     printf("[%d]", minimumPath->d[i]);
