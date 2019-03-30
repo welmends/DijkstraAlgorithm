@@ -52,12 +52,12 @@ void initDigraph(Digraph** digraph);
 void inputDigraph(Digraph* digraph, char** argv, int* source, int* target);
 void displayDigraph(Digraph* digraph);
 
-int getVertice(Digraph* digraph, int verticeName);
-Arrow getArrow(Digraph* digraph, int verticeName, int arrowName);
+int getVertice(Digraph* digraph, int v);
+Arrow getArrow(Digraph* digraph, int u, int v);
 
 void addVertice(Digraph* digraph, int newVertice);
 void addArrow(Digraph* digraph, int sourceVertice, int targetVertice, int cost);
-void delVertice(Digraph* digraph, int currVertice);
+void delVertice(Digraph* digraph, int delVertice);
 void delArrow(Digraph* digraph, int sourceVertice, int targetVertice);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -329,16 +329,16 @@ void displayDigraph(Digraph *digraph){
 }
 
 /**
- * @brief: O metodo getVertice retorna o index do vertice dado o nome do vertice.
+ * @brief: O metodo getVertice retorna o index do vertice dado o vertice v.
  * @param:  Digraph*
  * @return: int
  */
-int getVertice(Digraph *digraph, int verticeName){
+int getVertice(Digraph *digraph, int v){
   int i;
 
   //Verifique se ja existe esse vertice
   for(i=0; i<digraph->verticeSize; i++){
-    if(digraph->vertices[i]==verticeName){
+    if(digraph->vertices[i]==v){
       return i;//Se sim, retorne seu index
     }
   }
@@ -350,16 +350,16 @@ int getVertice(Digraph *digraph, int verticeName){
  * @param:  Digraph*
  * @return: Arrow
  */
-Arrow getArrow(Digraph *digraph, int verticeName, int arrowName){
-  int i, u;
+Arrow getArrow(Digraph *digraph, int u, int v){
+  int i;
   Arrow a = {-1, -1};
 
   //Pegue o vertice
-  u = getVertice(digraph, verticeName);
+  u = getVertice(digraph, u);
 
   //Verifique se ja existe esse vertice
   for(i=0; i<digraph->arrowsSizes[u]; i++){
-    if(digraph->connectedList[u][i].target==arrowName){
+    if(digraph->connectedList[u][i].target==v){
       a = digraph->connectedList[u][i];
       return a;//Se sim, retorne o arrow correto
     }
@@ -540,9 +540,9 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
  * @param:  Digraph*, int
  * @return: void
  */
-void delVertice(Digraph *digraph, int currVertice){
+void delVertice(Digraph *digraph, int delVertice){
   //Verifique se ja existe esse vertice
-  int v = getVertice(digraph, currVertice);
+  int v = getVertice(digraph, delVertice);
 
   if(v==-1){
     return;//Saia da funcao sem conseguir deletar o vertice
