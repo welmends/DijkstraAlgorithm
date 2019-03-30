@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define PLUS_INFINITE (1/0.0)
 #define DWORD int
 
 typedef struct DigraphArrow{
@@ -69,9 +68,9 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   DWORD sizeZ = 1;
   Z = (DWORD *)calloc(sizeZ, sizeof(DWORD));
 
-  //Percorra zerando previous e setando d para PLUS_INFINITE
+  //Percorra zerando previous e setando d para -1 (custo negativo nao conta)
   for(i=0; i<minimumPath->size; i++){
-    minimumPath->d[i] = PLUS_INFINITE;
+    minimumPath->d[i] = -1;
     minimumPath->previous[i] = 0;
   }
   Z[0] = minimumPath->source;//Coloque source na fronteira
@@ -81,13 +80,14 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   DWORD u, v;
   while(getMinimumCostArrowInBorder(digraph, minimumPath, Z, sizeZ, &u, &v)){
     aux = (DWORD *)realloc(Z, (sizeZ+1)*sizeof(DWORD));
-
     Z = aux;
     Z[sizeZ] = v;
     sizeZ++;
 
     minimumPath->d[v] = minimumPath->d[u]+digraph->connectedList[u][v].cost;
     minimumPath->previous[v] = u;
+
+    delArrow(digraph, u, v);
 
     if(minimumPath->target==v){
       break;
@@ -115,6 +115,7 @@ void displayMinimumPath(MinimumPath *minimumPath){
   //Implement...
   bool hasEnded = false;
   DWORD currVertice = minimumPath->target;
+  printf("minimum path\n");
   while(!hasEnded){
     if(currVertice==minimumPath->source){
       printf("[%d]", currVertice);
@@ -124,6 +125,7 @@ void displayMinimumPath(MinimumPath *minimumPath){
       currVertice = minimumPath->previous[currVertice];
     }
   }
+  printf("\n");
   printf("\n  d  -> ");
   for(i=0; i<minimumPath->size; i++){
     printf("[%d]", minimumPath->d[i]);
@@ -132,15 +134,20 @@ void displayMinimumPath(MinimumPath *minimumPath){
   for(i=0; i<minimumPath->size; i++){
     printf("[%d]", minimumPath->previous[i]);
   }
+  printf("\nindex-> ");
+  for(i=0; i<minimumPath->size; i++){
+    printf("[%d]", i+1);
+  }
   printf("\n");
 }
 bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, DWORD *Z, DWORD sizeZ, DWORD *u, DWORD *v){
-  DWORD min=-1, minAux, uAux, vAux;
+  DWORD min=-1, minAux, uAux, vAux, uIndex;
   bool isInBorder;
   for(i=0; i<sizeZ; i++){
-    uAux = getVertice(digraph, Z[i]);
-    for(j=0; j<digraph->arrowsSizes[z]; j++){
-      vAux = digraph->connectedList[z][j].target;
+    uAux = Z[i];
+    uIndex = getVertice(digraph, uAux);
+    for(j=0; j<digraph->arrowsSizes[uIndex]; j++){
+      vAux = digraph->connectedList[uIndex][j].target;
       isInBorder = true;
       for(z=0; z<sizeZ; z++){
         if(Z[z]==vAux){
@@ -149,7 +156,11 @@ bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, DWO
         }
       }
       if(isInBorder){
-        minAux = minimumPath->d[uAux]+digraph->connectedList[uAux][vAux].cost;
+        if(minimumPath->d[uAux]==-1){
+          minAux = digraph->connectedList[uIndex][vAux].cost;
+        }else{
+          minAux = minimumPath->d[uAux]+digraph->connectedList[uIndex][vAux].cost;
+        }
         if(min==-1){
           min = minAux;
           *u = uAux;
