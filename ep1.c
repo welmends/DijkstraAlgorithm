@@ -489,22 +489,24 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
   addVertice(digraph, sourceVertice);
   addVertice(digraph, targetVertice);
 
-  //Verifique se o arco (s,t) existe no Digrafo
+  //Verifique se os vertices existem no Digrafo
   source = getVertice(digraph, sourceVertice);
   target = getVertice(digraph, targetVertice);
 
-  for(i=0; i<digraph->arrowsSizes[target]; i++){
-    if(digraph->connectedList[target][i].target==sourceVertice){
-      printf("Error [void addArrow]: the input digraph has an arrow from u to v and from v to u, this code do not accept not simple digraph\n");
-      exit(-1);
-    }
-  }
-
+  //Verifique se o arco existe no Digrafo
   for(i=0; i<digraph->arrowsSizes[source]; i++){
     if(digraph->connectedList[source][i].target==targetVertice){
       target = i;
       digraph->connectedList[source][target].cost = cost;
       return;//Saia da funcao atualizando o custo do arco ja existente
+    }
+  }
+
+  //Verifique se o grafo eh nao simples
+  for(i=0; i<digraph->arrowsSizes[target]; i++){
+    if(digraph->connectedList[target][i].target==sourceVertice){
+      printf("Error [void addArrow]: the input digraph has an arrow from u to v and from v to u, this code do not accept not simple digraph\n");
+      exit(-1);
     }
   }
 
