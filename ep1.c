@@ -36,6 +36,7 @@ void displayMinimumPath(MinimumPath *minimumPath, bool showVectors);
 bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, int *Z, int *u, int *v);
 
 void initDigraph(Digraph **digraph);
+void inputDigraph(Digraph *digraph, char **argv, int *source, int *target);
 void displayDigraph(Digraph *digraph);
 int getVertice(Digraph *digraph, int verticeName);
 Arrow getArrow(Digraph *digraph, int verticeName, int arrowName);
@@ -44,41 +45,19 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost);
 void delVertice(Digraph *digraph, int currVertice);
 void delArrow(Digraph *digraph, int sourceVertice, int targetVertice);
 
-int main(){
+int main(int argc, char **argv){
+  if(argc!=2){
+    printf("Error [int main]: arguments number must be 2\n");
+    return 1;
+  }
+
+  int source, target;
   Digraph *digraph;
+  
   initDigraph(&digraph);
-
-  //**** Graph 1 (s=1, t=4)
-  addArrow(digraph, 1, 2, 5);
-  addArrow(digraph, 1, 5, 10);
-  addArrow(digraph, 2, 3, 4);
-  addArrow(digraph, 2, 4, 13);
-  addArrow(digraph, 2, 5, 2);
-  addArrow(digraph, 3, 4, 7);
-  addArrow(digraph, 5, 4, 6);
-  //**** Graph 2 (s=1, t=10)
-  // addArrow(digraph, 1, 2, 0);
-  // addArrow(digraph, 1, 3, 4);
-  // addArrow(digraph, 1, 4, 1);
-  // addArrow(digraph, 2, 3, 4);
-  // addArrow(digraph, 2, 5, 5);
-  // addArrow(digraph, 2, 6, 5);
-  // addArrow(digraph, 3, 6, 1);
-  // addArrow(digraph, 4, 3, 3);
-  // addArrow(digraph, 4, 7, 1);
-  // addArrow(digraph, 5, 8, 1);
-  // addArrow(digraph, 6, 5, 0);
-  // addArrow(digraph, 6, 8, 2);
-  // addArrow(digraph, 6, 9, 3);
-  // addArrow(digraph, 7, 3, 1);
-  // addArrow(digraph, 7, 6, 3);
-  // addArrow(digraph, 7, 9, 5);
-  // addArrow(digraph, 8, 9, 1);
-  // addArrow(digraph, 8, 10, 3);
-  // addArrow(digraph, 9, 10, 1);
-
+  inputDigraph(digraph, argv, &source, &target);
   displayDigraph(digraph);
-  displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4), false);
+  displayMinimumPath(dijkstraAlgorithm(digraph, source, target), false);
 
   return 0;
 }
@@ -134,7 +113,7 @@ void initMinimumPath(MinimumPath **minimumPath, int verticeSize, int source, int
   (*minimumPath)->previous = (int *)calloc((*minimumPath)->size, sizeof(int));
   //Verifique a alocacao de memoria
   if(*minimumPath==NULL || (*minimumPath)->d==NULL || (*minimumPath)->previous==NULL){
-    printf("Error [void initMinimumPath]: No memory");
+    printf("Error [void initMinimumPath]: No memory\n");
     exit(-1);
   }
 }
@@ -249,7 +228,25 @@ void initDigraph(Digraph **digraph){
   **digraph = (Digraph){NULL, NULL, NULL, 0, 0};
   //Verifique a alocacao de memoria
   if(*digraph==NULL){
-    printf("Error [void initDigraph]: No memory");
+    printf("Error [void initDigraph]: No memory\n");
+    exit(-1);
+  }
+}
+void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
+  FILE *file;
+  int vSize, aSize;
+  int u, v, cost;
+
+  file = fopen(argv[1], "r");
+  fscanf(file, "%d %d %d %d", &vSize, &aSize, &*source, &*target);
+  while(fgetc(file) != EOF){
+    fscanf(file, "%d %d %d", &u, &v, &cost);
+    addArrow(digraph, u, v, cost);
+  }
+  fclose(file);
+
+  if(vSize!=digraph->verticeSize || aSize!=digraph->arrowSize){
+    printf("Error [void inputDigraph]: the input digraph is wrong, the number of arrow or vertices do not match\n");
     exit(-1);
   }
 }
@@ -283,7 +280,7 @@ Arrow getArrow(Digraph *digraph, int verticeName, int arrowName){
 
   //Pegue o vertice
   u = getVertice(digraph, verticeName);
-  
+
   //Verifique se ja existe esse vertice
   for(i=0; i<digraph->arrowsSizes[u]; i++){
     if(digraph->connectedList[u][i].target==arrowName){
@@ -304,7 +301,7 @@ void addVertice(Digraph *digraph, int newVertice){
     digraph->arrowsSizes = (int *)calloc(1,sizeof(int));
     //Verifique a alocacao de memoria
     if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
-      printf("Error [void addVertice]: No memory");
+      printf("Error [void addVertice]: No memory\n");
       exit(-1);
     }
 
@@ -331,7 +328,7 @@ void addVertice(Digraph *digraph, int newVertice){
     aux2 = (int *)calloc(digraph->verticeSize+1, sizeof(int));
     //Verifique a alocacao de memoria
     if(aux==NULL || aux1==NULL || aux2==NULL){
-      printf("Error [void addVertice]: No memory");
+      printf("Error [void addVertice]: No memory\n");
       exit(-1);
     }
 
@@ -350,7 +347,7 @@ void addVertice(Digraph *digraph, int newVertice){
         aux[i] = (Arrow *)calloc(digraph->arrowsSizes[iAux], sizeof(Arrow));
         //Verifique a alocacao de memoria
         if(aux[i]==NULL){
-          printf("Error [void addVertice]: No memory");
+          printf("Error [void addVertice]: No memory\n");
           exit(-1);
         }
 
@@ -383,7 +380,7 @@ void addVertice(Digraph *digraph, int newVertice){
     digraph->arrowsSizes = (int *)calloc(digraph->verticeSize, sizeof(int));
     //Verifique a alocacao de memoria
     if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
-      printf("Error [void addVertice]: No memory");
+      printf("Error [void addVertice]: No memory\n");
       exit(-1);
     }
 
@@ -417,7 +414,7 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
     digraph->connectedList[source] = (Arrow *)calloc(1,sizeof(Arrow));
     //Verifique a alocacao de memoria
     if(digraph->connectedList[source]==NULL){
-      printf("Error [void addArrow]: No memory");
+      printf("Error [void addArrow]: No memory\n");
       exit(-1);
     }
 
@@ -436,7 +433,7 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
     aux = (Arrow *)realloc(digraph->connectedList[source], (digraph->arrowsSizes[source]+1)*sizeof(Arrow));
     //Verifique a alocacao de memoria
     if(aux==NULL){
-      printf("Error [void addArrow]: No memory");
+      printf("Error [void addArrow]: No memory\n");
       exit(-1);
     }
 
@@ -468,7 +465,7 @@ void delVertice(Digraph *digraph, int currVertice){
     aux2 = (int *)calloc(digraph->verticeSize-1, sizeof(int));
     //Verifique a alocacao de memoria
     if(aux==NULL || aux1==NULL || aux2==NULL){
-      printf("Error [void delVertice]: No memory");
+      printf("Error [void delVertice]: No memory\n");
       exit(-1);
     }
 
@@ -480,7 +477,7 @@ void delVertice(Digraph *digraph, int currVertice){
         aux[iAux] = (Arrow *)calloc(digraph->arrowsSizes[i], sizeof(Arrow));
         //Verifique a alocacao de memoria
         if(aux[i]==NULL){
-          printf("Error [void delVertice]: No memory");
+          printf("Error [void delVertice]: No memory\n");
           exit(-1);
         }
 
@@ -515,7 +512,7 @@ void delVertice(Digraph *digraph, int currVertice){
     digraph->arrowsSizes = (int *)calloc(digraph->verticeSize, sizeof(int));
     //Verifique a alocacao de memoria
     if(digraph->connectedList==NULL || digraph->vertices==NULL || digraph->arrowsSizes==NULL){
-      printf("Error [void delVertice]: No memory");
+      printf("Error [void delVertice]: No memory\n");
       exit(-1);
     }
 
@@ -550,7 +547,7 @@ void delArrow(Digraph *digraph, int sourceVertice, int targetVertice){
     aux = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));
     //Verifique a alocacao de memoria
     if(aux==NULL){
-      printf("Error [void delArrow]: No memory");
+      printf("Error [void delArrow]: No memory\n");
       exit(-1);
     }
 
@@ -565,7 +562,7 @@ void delArrow(Digraph *digraph, int sourceVertice, int targetVertice){
       }
       //Verifique a alocacao de memoria
       if(aux[iAux]==NULL){
-        printf("Error [void delArrow]: No memory");
+        printf("Error [void delArrow]: No memory\n");
         exit(-1);
       }
 
@@ -593,7 +590,7 @@ void delArrow(Digraph *digraph, int sourceVertice, int targetVertice){
     digraph->connectedList = (Arrow **)calloc(digraph->verticeSize, sizeof(Arrow *));
     //Verifique a alocacao de memoria
     if(digraph->connectedList==NULL){
-      printf("Error [void delArrow]: No memory");
+      printf("Error [void delArrow]: No memory\n");
       exit(-1);
     }
 
