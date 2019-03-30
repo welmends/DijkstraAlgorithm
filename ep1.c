@@ -1,4 +1,5 @@
 //TODO
+// - Add input treatment
 // - Add constraints
 // - See a better structure (put all in digraph)
 // - optimize the code

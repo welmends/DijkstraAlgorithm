@@ -23,10 +23,27 @@ Here we tell how to run this program
 - Call the executable by typing at terminal on project folder
 
 ```shell
-./ep1.o
+./ep1.o 'path_to_txtFile.txt'
 ```
 
-- Input...
+- The .txt file must have the following pattern
+
+<center>
+**n &nbsp;&nbsp;m &nbsp;&nbsp;s &nbsp;&nbsp;t  
+u<sub>1</sub> &nbsp;v<sub>1</sub> &nbsp;c<sub>1</sub>  
+u<sub>2</sub> &nbsp;v<sub>2</sub> &nbsp;c<sub>2</sub>  
+&nbsp;&nbsp;&nbsp;&nbsp;. . .   
+u<sub>m</sub> v<sub>m</sub> c<sub>m</sub>**
+</center>
+
+where,  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **n** is the vertices number;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **m** is the arrows number;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **s** is the origin vertice;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **t** is the destination vertice;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **u<sub>i</sub>** and **v<sub>1</sub>** are the origin and destination of the arrow **i**;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **c<sub>1</sub>** is the cost of the arrow **i**.
+
 
 #### Behavior
 For an input as follows:
@@ -36,7 +53,15 @@ For an input as follows:
 We have as output:
 
 ```
-Caminho mínimo do vértice 1 ao 4: (1, 2) (2, 5) (5, 4)
+> Digraph:
+5 7
+1 2 5
+1 5 10
+2 3 4
+2 4 13
+2 5 2
+3 4 7
+5 4 6
 
-Custo: 13
+> Minimum Path [1 to 4]: [1]->[2]->[5]->[4]
 ```
