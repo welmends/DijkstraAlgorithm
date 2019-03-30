@@ -111,13 +111,17 @@ void initMinimumPath(MinimumPath **minimumPath, DWORD verticeSize, DWORD source,
   }
 }
 void displayMinimumPath(MinimumPath *minimumPath){
+  if(minimumPath->previous[minimumPath->target-1]==0){
+    printf("Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
+    return;
+  }
+
   bool hasEnded;
   DWORD currVertice;
 
   hasEnded = false;
   currVertice = minimumPath->target;
   i=0;
-  currVertice = minimumPath->target;
   while(!hasEnded){
     if(currVertice==minimumPath->source){
       hasEnded = true;
@@ -140,7 +144,7 @@ void displayMinimumPath(MinimumPath *minimumPath){
     }
   }
 
-  printf("Minimum Path [%d to %d]:\n", minimumPath->source, minimumPath->target);
+  printf("Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
   for(i=0; i<j; i++){
     printf("[%d]",minPath[i]);
     if(i==j-1){
@@ -149,7 +153,7 @@ void displayMinimumPath(MinimumPath *minimumPath){
       printf("->");
     }
   }
-  
+
   printf("\n  d  -> ");
   for(i=0; i<minimumPath->size; i++){
     printf("[%d]", minimumPath->d[i]);
