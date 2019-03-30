@@ -30,7 +30,7 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target);
 
 void initMinimumPath(MinimumPath **digraph, DWORD verticeSize);
 void displayMinimumPath(MinimumPath *minimumPath);
-bool isInBorder(DWORD *Z, DWORD sizeZ, DWORD vertice);
+DWORD getMinimumCostArrowInBorder(Digraph *digraph, DWORD *Z, DWORD sizeZ, DWORD &u, DWORD &v);
 
 void initDigraph(Digraph **digraph);
 void displayDigraph(Digraph *digraph);
@@ -54,7 +54,7 @@ int main(){
 
   displayDigraph(digraph);
 
-  //displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4));
+  displayMinimumPath(dijkstraAlgorithm(digraph, 1, 4));
   return 0;
 }
 
@@ -63,10 +63,9 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   MinimumPath *minimumPath;
   initMinimumPath(&minimumPath, digraph->verticeSize);//init
   //Declare e aloque um vetor Z (fronteira)
-  DWORD *Z;
+  DWORD *Z, *aux;
   DWORD sizeZ = 1;
   Z = (DWORD *)calloc(sizeZ, sizeof(DWORD));
-  DWORD v;
 
   //Percorra zerando previous e setando d para PLUS_INFINITE
   for(i=0; i<minimumPath->size; i++){
@@ -77,15 +76,21 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, DWORD source, DWORD target){
   minimumPath->d[0] = 0;//Coloque d[0] = 0
 
   //Verifique se existe arco na fronteira
-  while(true){
-    for(i=0; i<sizeZ; i++){
-      for(j=0; j<digraph->arrowsSizes[getVertice(digraph, Z[i])]; j++){
-        v = digraph->connectedList[getVertice(digraph, Z[i])][j].target;
-        if(isInBorder(Z, sizeZ, v)){
-          //minimumPath->d[v]+digraph->connectedList[getVertice(digraph, Z[i])][j].cost;//Continue daqui
-        }
-      }
+  DWORD u, v;
+  while(getMinimumCostArrowInBorder(digraph, Z, sizeZ, u, v)){
+    aux = (DWORD *)realloc(Z, (sizeZ+1)*sizeof(DWORD));
+    //Verifique a alocacao de memoria
+    if(aux==NULL){
+      printf("Error [void addArrow]: No memory");
+      exit(-1);
     }
+
+    Z = aux;
+    Z[sizeZ] = v;
+    sizeZ++;
+
+    minimumPath->d[v] = minimumPath->d[v]+digraph->connectedList[z][j].cost;
+    minimumPath->previous[v] = u;
   }
 
   return minimumPath;
@@ -115,13 +120,40 @@ void displayMinimumPath(MinimumPath *minimumPath){
     }
   }
 }
-bool isInBorder(DWORD *Z, DWORD sizeZ, DWORD vertice){
-  for(z=0; z<sizeZ; z++){
-    if(Z[z]==vertice){
-      return false;
+bool getMinimumCostArrowInBorder(Digraph *digraph, DWORD *Z, DWORD sizeZ, DWORD &u, DWORD &v){
+  DWORD min=-1, minAux, uAux, vAux;
+  bool isInBorder;
+  for(i=0; i<sizeZ; i++){
+    uAux = getVertice(digraph, Z[i]);
+    for(j=0; j<digraph->arrowsSizes[z]; j++){
+      vAux = digraph->connectedList[z][j].target;
+      isInBorder = true;
+      for(z=0; z<sizeZ; z++){
+        if(Z[z]==vAux){
+          isInBorder = false;
+          break;
+        }
+      }
+      if(isInBorder){
+        minAux = minimumPath->d[uAux]+digraph->connectedList[uAux][vAux].cost;
+        if(min==-1){
+          min = minAux;
+          u = uAux;
+          v = vAux;
+        }else{
+          if(minAux<min){
+            min = minAux;
+            u = uAux;
+            v = vAux;
+          }
+        }
+      }
     }
   }
-  return true;
+  if(min!=-1){
+    return true;
+  }
+  return false;
 }
 
 void initDigraph(Digraph **digraph){
@@ -143,6 +175,7 @@ void displayDigraph(Digraph *digraph){
       printf("%d %d %d\n",digraph->vertices[i], digraph->connectedList[i][j].target, digraph->connectedList[i][j].cost);
     }
   }
+  printf("\n");
 }
 DWORD getVertice(Digraph *digraph, DWORD verticeName){
   //Verifique se ja existe esse vertice
