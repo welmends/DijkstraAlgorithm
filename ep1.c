@@ -4,48 +4,73 @@
 // - See a better structure (put all in digraph)
 // - optimize the code
 
+////////////////////////////////////////////////////////////////////////////////
+//                                  Libraries                                 //
+////////////////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 
+////////////////////////////////////////////////////////////////////////////////
+//                                   Structs                                  //
+////////////////////////////////////////////////////////////////////////////////
+
+//Arrow struct
 typedef struct DigraphArrow{
   int target;
   int cost;
 }Arrow;
 
+//Digraph struct
 typedef struct DirectedGraph{
-  Arrow **connectedList;
-  int *vertices;
-  int *arrowsSizes;
+  Arrow** connectedList;
+  int* vertices;
+  int* arrowsSizes;
   int verticeSize;
   int arrowSize;
 }Digraph;
 
+//Dijkstra minimum path struct
 typedef struct DijkstraMinimumPath{
-  int *d;
-  int *previous;
+  int* d;
+  int* previous;
   int size;
   int source;
   int target;
 }MinimumPath;
 
-MinimumPath* dijkstraAlgorithm(Digraph *digraph, int source, int target);
+////////////////////////////////////////////////////////////////////////////////
+//                                 Prototypes                                 //
+////////////////////////////////////////////////////////////////////////////////
+MinimumPath* dijkstraAlgorithm(Digraph* digraph, int source, int target);
 
-void initMinimumPath(MinimumPath **digraph, int verticeSize, int source, int target);
-void displayMinimumPath(MinimumPath *minimumPath, bool showVectors);
-bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, int *Z, int *u, int *v);
+void initMinimumPath(MinimumPath** digraph, int verticeSize, int source, int target);
+void displayMinimumPath(MinimumPath* minimumPath, bool showVectors);
+bool getMinimumCostArrowInBorder(Digraph* digraph, MinimumPath* minimumPath, int* Z, int* u, int* v);
 
-void initDigraph(Digraph **digraph);
-void inputDigraph(Digraph *digraph, char **argv, int *source, int *target);
-void displayDigraph(Digraph *digraph);
-int getVertice(Digraph *digraph, int verticeName);
-Arrow getArrow(Digraph *digraph, int verticeName, int arrowName);
-void addVertice(Digraph *digraph, int newVertice);
-void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost);
-void delVertice(Digraph *digraph, int currVertice);
-void delArrow(Digraph *digraph, int sourceVertice, int targetVertice);
+void initDigraph(Digraph** digraph);
+void inputDigraph(Digraph* digraph, char** argv, int* source, int* target);
+void displayDigraph(Digraph* digraph);
 
-int main(int argc, char **argv){
+int getVertice(Digraph* digraph, int verticeName);
+Arrow getArrow(Digraph* digraph, int verticeName, int arrowName);
+
+void addVertice(Digraph* digraph, int newVertice);
+void addArrow(Digraph* digraph, int sourceVertice, int targetVertice, int cost);
+void delVertice(Digraph* digraph, int currVertice);
+void delArrow(Digraph* digraph, int sourceVertice, int targetVertice);
+
+////////////////////////////////////////////////////////////////////////////////
+//                                Source Code                                 //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief: O metodo main chama todos os outros metodos visando realizar todas as
+           operacoes necessarias para o calculo do algorito de Dijkstra.
+ * @param:  int argc, char **argv
+ * @return: int
+ */
+int main(int argc, char** argv){
   if(argc!=2){
     printf("Error [int main]: arguments number must be 2\n");
     return 1;
@@ -53,7 +78,7 @@ int main(int argc, char **argv){
 
   int source, target;
   Digraph *digraph;
-  
+
   initDigraph(&digraph);
   inputDigraph(digraph, argv, &source, &target);
   displayDigraph(digraph);
@@ -62,10 +87,16 @@ int main(int argc, char **argv){
   return 0;
 }
 
-MinimumPath* dijkstraAlgorithm(Digraph *digraph, int source, int target){
+/**
+ * @brief:  O metodo dijkstraAlgorithm realiza todas as operacoes do algoritmo de
+            Dijkstra e retorna o caminho minimo do 'source' para o 'target'.
+ * @param:  Digraph*, int, int
+ * @return: MinimumPath*
+ */
+MinimumPath* dijkstraAlgorithm(Digraph* digraph, int source, int target){
   int i, u, v;
   int Z[digraph->verticeSize+1];
-  MinimumPath *minimumPath;
+  MinimumPath* minimumPath;
 
   //Inicialize a struct DijkstraMinimumPath
   initMinimumPath(&minimumPath, digraph->verticeSize, source, target);//init
@@ -103,7 +134,12 @@ MinimumPath* dijkstraAlgorithm(Digraph *digraph, int source, int target){
   return minimumPath;
 }
 
-void initMinimumPath(MinimumPath **minimumPath, int verticeSize, int source, int target){
+/**
+ * @brief: O metodo initMinimumPath inicializa a estrutura minimumPath.
+ * @param:  MinimumPath**, int, int, int
+ * @return: void
+ */
+void initMinimumPath(MinimumPath** minimumPath, int verticeSize, int source, int target){
   //Aloque o Caminho Minimo
   *minimumPath  = (MinimumPath *)calloc(1, sizeof(Digraph));
   //Inicialize o Caminho Minimo
@@ -117,7 +153,12 @@ void initMinimumPath(MinimumPath **minimumPath, int verticeSize, int source, int
     exit(-1);
   }
 }
-void displayMinimumPath(MinimumPath *minimumPath, bool showVectors){
+/**
+ * @brief: O metodo displayMinimumPath mostra como esta a estrutura minimumPath.
+ * @param:  MinimumPath*, bool
+ * @return: void
+ */
+void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
   if(minimumPath->previous[minimumPath->target-1]==0){
     printf("> Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
     return;
@@ -177,7 +218,14 @@ void displayMinimumPath(MinimumPath *minimumPath, bool showVectors){
     printf("\n");
   }
 }
-bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, int *Z, int *u, int *v){
+/**
+ * @brief: O metodo getMinimumCostArrowInBorder verifica se existe algum arco na
+           fronteira de Z. Se existir algum arco o metodo retorna 'true' e atualiza
+           os valores (u,v) que representam o arco minimo na fronteira de Z.
+ * @param:  Digraph*, MinimumPath*, int*, int*, int*
+ * @return: bool
+ */
+bool getMinimumCostArrowInBorder(Digraph* digraph, MinimumPath* minimumPath, int* Z, int* u, int* v){
   int i, j, z;
   int min=-1, minAux, uAux, vAux, uIndex, vIndex;
   bool isInBorder;
@@ -221,6 +269,11 @@ bool getMinimumCostArrowInBorder(Digraph *digraph, MinimumPath *minimumPath, int
   return false;
 }
 
+/**
+ * @brief: O metodo initDigraph inicializa a estrutura Digraph.
+ * @param:  Digraph**
+ * @return: void
+ */
 void initDigraph(Digraph **digraph){
   //Aloque o Digrafo
   *digraph  = (Digraph *)calloc(1, sizeof(Digraph));
@@ -232,6 +285,12 @@ void initDigraph(Digraph **digraph){
     exit(-1);
   }
 }
+/**
+ * @brief: O metodo inputDigraph abre o arquivo .txt (passado como argumento) e
+           preenche o Digrafo.
+ * @param:  Digraph**, char**, int*, int*
+ * @return: void
+ */
 void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
   FILE *file;
   int vSize, aSize;
@@ -250,6 +309,11 @@ void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
     exit(-1);
   }
 }
+/**
+ * @brief: O metodo displayMinimumPath mostra como esta a estrutura Digraph.
+ * @param:  Digraph*
+ * @return: void
+ */
 void displayDigraph(Digraph *digraph){
   int i, j;
 
@@ -263,6 +327,12 @@ void displayDigraph(Digraph *digraph){
   }
   printf("\n");
 }
+
+/**
+ * @brief: O metodo getVertice retorna o index do vertice dado o nome do vertice.
+ * @param:  Digraph*
+ * @return: int
+ */
 int getVertice(Digraph *digraph, int verticeName){
   int i;
 
@@ -274,6 +344,12 @@ int getVertice(Digraph *digraph, int verticeName){
   }
   return -1;//Se nao, retorne -1
 }
+/**
+ * @brief: O metodo getArrow retorna uma instancia da estrutura Arrow dado os
+           vertices u e v.
+ * @param:  Digraph*
+ * @return: Arrow
+ */
 Arrow getArrow(Digraph *digraph, int verticeName, int arrowName){
   int i, u;
   Arrow a = {-1, -1};
@@ -290,6 +366,12 @@ Arrow getArrow(Digraph *digraph, int verticeName, int arrowName){
   }
   return a;//Se nao, retorne a = {-1, -1}
 }
+
+/**
+ * @brief: O metodo addVertice adiciona um vertice na lista de adjacencias.
+ * @param:  Digraph*, int
+ * @return: void
+ */
 void addVertice(Digraph *digraph, int newVertice){
   //Se nao houver vertices adicione o primeiro
   if(digraph->verticeSize==0){
@@ -390,6 +472,11 @@ void addVertice(Digraph *digraph, int newVertice){
     digraph->arrowsSizes = aux2;
   }
 }
+/**
+ * @brief: O metodo addArrow adiciona um arco na lista de adjacencias.
+ * @param:  Digraph*, int, int, int
+ * @return: void
+ */
 void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
   int i, source=-1, target=-1;
 
@@ -448,6 +535,11 @@ void addArrow(Digraph *digraph, int sourceVertice, int targetVertice, int cost){
     digraph->arrowSize++;
   }
 }
+/**
+ * @brief: O metodo delVertice deleta um vertice da lista de adjacencias.
+ * @param:  Digraph*, int
+ * @return: void
+ */
 void delVertice(Digraph *digraph, int currVertice){
   //Verifique se ja existe esse vertice
   int v = getVertice(digraph, currVertice);
@@ -522,6 +614,11 @@ void delVertice(Digraph *digraph, int currVertice){
     digraph->arrowsSizes = aux2;
   }
 }
+/**
+ * @brief: O metodo delArrow deleta um arco da lista de adjacencias.
+ * @param:  Digraph*, int, int
+ * @return: void
+ */
 void delArrow(Digraph *digraph, int sourceVertice, int targetVertice){
   //Declare uma variavel para indice do source e target na lista conectada
   int i, j, source=-1, target=-1;
