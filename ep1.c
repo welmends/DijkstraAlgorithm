@@ -54,7 +54,7 @@ void addArrow(Digraph* digraph, int sourceVertice, int targetVertice, int cost);
 void delVertice(Digraph* digraph, int delVertice);
 void delArrow(Digraph* digraph, int sourceVertice, int targetVertice);
 
-void freeUp();
+void freeUp(Digraph* digraph, MinimumPath* minimumPath);
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                Source Code                                 //
@@ -99,6 +99,9 @@ int main(int argc, char** argv){
 
   displayDigraph(digraph);
   displayMinimumPath(minimumPath, false);
+
+  freeUp(digraph, minimumPath);
+
   return 0;
 }
 
@@ -708,4 +711,26 @@ void delArrow(Digraph *digraph, int sourceVertice, int targetVertice){
     //Passe as referencias para a variavel original
     digraph->adjacency_list = aux;
   }
+}
+
+/**
+ * @brief: O metodo freeUp, desaloca as structs passadas como entrada.
+ * @param:  Digraph*, MinimumPath*
+ * @return: void
+ */
+void freeUp(Digraph* digraph, MinimumPath* minimumPath){
+  //Declare as variaveis
+  int i;
+  //Digraph
+  for(i=0; i<digraph->vertice_size; i++){
+    free(digraph->adjacency_list[i]);
+  }
+  free(digraph->adjacency_list);
+  free(digraph->vertices_values);
+  free(digraph->arrows_sizes);
+  free(digraph);
+  //MinimumPath
+  free(minimumPath->d);
+  free(minimumPath->previous);
+  free(minimumPath);
 }
