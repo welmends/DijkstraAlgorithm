@@ -68,7 +68,7 @@ void freeUp(Digraph* digraph, MinimumPath* minimumPath);
  */
 int main(int argc, char** argv){
   if(argc!=2){
-    printf("\033[1m\033[31mError [int main]: the number of arguments must be equal to 2\n\n\033[0m");
+    printf("Error [int main]: the number of arguments must be equal to 2\n\n");
     printf("Example: ./ep1.o '<path_to_txtFile>/filename.txt'\n");
     printf("         ./ep1.o 'filename.txt'\n\n");
     printf("Obs.: The '.txt' file must have the following pattern:\n");
