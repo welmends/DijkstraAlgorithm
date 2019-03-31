@@ -5,7 +5,7 @@ Implementation of Dijstra Algorithm
 This repository provides an C/C++ implementation of Dijstra Algorithm
 
 ### Prerequisites
-  - C ANSI (any GCC version)
+  - C99 (or any GCC version)
 
 ### Compilation
 - Enter into the repository folder and type the following commands:
