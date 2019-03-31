@@ -46,9 +46,12 @@ where,
 #### Behavior
 For an input as follows:
 
+```shell
+./ep1.o 'example1.txt'
+```
 ![Ilustration](https://user-images.githubusercontent.com/19287934/55241837-c177ec00-521a-11e9-8dcb-d02834f915e7.png)
 
-We have as output:
+We have the following output:
 
 ```
 > Digraph:
