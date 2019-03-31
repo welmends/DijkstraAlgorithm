@@ -231,6 +231,10 @@ void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
   int u, v, cost;
   //Efetue a leitura do arquivo passado como entrado
   file = fopen(argv[1], "r");
+  if(file == NULL){
+    printf("Error [void inputDigraph]: '%s' could not be opened\n", argv[1]);
+    exit(-1);
+  }
   fscanf(file, "%d %d %d %d", &vSize, &aSize, &*source, &*target);
   //Verifique se source e target sao iguais
   if(*source==*target){
