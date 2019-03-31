@@ -23,7 +23,7 @@ Here we tell how to run this program
 - Call the executable by typing at terminal on project folder
 
 ```shell
-./ep1.o '<path_to_txtFile>/filename.txt'
+./ep1.o <path_to_txtFile>/filename.txt
 ```
 
 - The .txt file must have the following pattern
@@ -47,7 +47,7 @@ where,
 For an input as follows:
 
 ```shell
-./ep1.o 'example1.txt'
+./ep1.o example1.txt
 ```
 ![Ilustration](https://user-images.githubusercontent.com/19287934/55241837-c177ec00-521a-11e9-8dcb-d02834f915e7.png)
 
