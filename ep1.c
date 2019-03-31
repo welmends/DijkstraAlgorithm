@@ -133,7 +133,7 @@ MinimumPath* dijkstraAlgorithm(Digraph* digraph, MinimumPath* minimumPath){
     Z[*Z] = v;
     //OBS.: Os valores sao "u-1" e "v-1", pois sao os valores indexados
     //Calcule o novo custo de s para v (atulizando d[v])
-    minimumPath->d[v-1] = minimumPath->d[u-1]+getArrow(digraph, u, v).cost;
+    minimumPath->d[v-1] = minimumPath->d[u-1] + getArrow(digraph, u, v).cost;
     //Atualize o vetor de anteriores (anterior[v])
     minimumPath->previous[v-1] = u;
     //Se chegar no target saia do laco
@@ -345,6 +345,8 @@ void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
       printf("->");
     }
   }
+  //Mostre o custo do caminho minimo
+  printf("> Minimum Path Cost: %d\n", minimumPath->d[minimumPath->target-1]);
   //Se showVectors==true, mostre os vetores da estrutura minimumPath
   if(showVectors){
     printf("\n  d  -> ");
