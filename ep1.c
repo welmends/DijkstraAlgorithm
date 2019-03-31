@@ -1,3 +1,20 @@
+/**
+ * Copyright by João Wellington, Elias Paulino, Francisco Juarez and Thalys Viana
+ *    Federal Institute of Education, Science and Technology of Ceará - IFCE
+ *          All rights reserved. This software is public domain.
+ *
+ * Development context: This software was made in the discipline of Graphs under
+ *                      the guidance of Professor Glauber F. Cintra.
+ *
+ * @file ep1.c
+ * @brief Dijkstra Algorithm on C language
+ *         Input     : A digraph with n vertices and m arrows, each arrow has a
+ *                     non-negative cost, and the source and the target.
+ *         Output    : A minimum path from source to target, if exists.
+ * @author $Author:$ Wellington; Elias; Juarez; Thalys
+ * @version $Final:$
+ */
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                  Libraries                                 //
 ////////////////////////////////////////////////////////////////////////////////
