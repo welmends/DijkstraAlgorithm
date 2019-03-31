@@ -66,7 +66,23 @@ void delArrow(Digraph* digraph, int sourceVertice, int targetVertice);
  */
 int main(int argc, char** argv){
   if(argc!=2){
-    printf("Error [int main]: arguments number must be 2\n");
+    printf("\033[1m\033[31mError [int main]: the number of arguments must be equal to 2\n\n\033[0m");
+    printf("Example: ./ep1.o '<path_to_txtFile>/filename.txt'\n");
+    printf("         ./ep1.o 'filename.txt'\n\n");
+    printf("Obs.: The '.txt' file must have the following pattern:\n");
+    printf("             n  m  s  t\n");
+    printf("            u1 v1 c1\n");
+    printf("            u2 v2 c2\n");
+    printf("            ...     \n");
+    printf("            um vm cm\n");
+    printf("      where,\n");
+    printf("            n is the vertices number;\n");
+    printf("            m is the arrows number;\n");
+    printf("            s is the origin vertice;\n");
+    printf("            t is the destination vertice;\n");
+    printf("            ui and vi are the origin and destination of the arrow i;\n");
+    printf("            ci is the cost of the arrow i.\n");
+
     return 1;
   }
 
