@@ -36,15 +36,15 @@ typedef struct DijkstraMinimumPath{
 ////////////////////////////////////////////////////////////////////////////////
 //                                 Prototypes                                 //
 ////////////////////////////////////////////////////////////////////////////////
-MinimumPath* dijkstraAlgorithm(Digraph* digraph, int source, int target);
-
-void initMinimumPath(MinimumPath** digraph, int vertice_size, int source, int target);
-void displayMinimumPath(MinimumPath* minimumPath, bool showVectors);
+MinimumPath* dijkstraAlgorithm(Digraph* digraph, MinimumPath* minimumPath);
 bool getMinimumCostArrowInBorder(Digraph* digraph, MinimumPath* minimumPath, int* Z, int* u, int* v);
 
 void initDigraph(Digraph** digraph);
 void inputDigraph(Digraph* digraph, char** argv, int* source, int* target);
 void displayDigraph(Digraph* digraph);
+
+void initMinimumPath(MinimumPath** digraph, int vertice_size, int source, int target);
+void displayMinimumPath(MinimumPath* minimumPath, bool showVectors);
 
 int getVertice(Digraph* digraph, int v);
 Arrow getArrow(Digraph* digraph, int u, int v);
@@ -53,6 +53,8 @@ void addVertice(Digraph* digraph, int newVertice);
 void addArrow(Digraph* digraph, int sourceVertice, int targetVertice, int cost);
 void delVertice(Digraph* digraph, int delVertice);
 void delArrow(Digraph* digraph, int sourceVertice, int targetVertice);
+
+void freeUp();
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                Source Code                                 //
@@ -86,12 +88,17 @@ int main(int argc, char** argv){
   }
 
   int source, target;
-  Digraph *digraph;
+  Digraph* digraph;
+  MinimumPath* minimumPath;
 
   initDigraph(&digraph);
   inputDigraph(digraph, argv, &source, &target);
+  initMinimumPath(&minimumPath, digraph->vertice_size, source, target);
+
+  dijkstraAlgorithm(digraph, minimumPath);
+
   displayDigraph(digraph);
-  displayMinimumPath(dijkstraAlgorithm(digraph, source, target), false);
+  displayMinimumPath(minimumPath, false);
   return 0;
 }
 
@@ -101,13 +108,10 @@ int main(int argc, char** argv){
  * @param:  Digraph*, int, int
  * @return: MinimumPath*
  */
-MinimumPath* dijkstraAlgorithm(Digraph* digraph, int source, int target){
+MinimumPath* dijkstraAlgorithm(Digraph* digraph, MinimumPath* minimumPath){
   //Declare as variaveis
   int i, u, v;
   int Z[digraph->vertice_size+1];
-  MinimumPath* minimumPath;
-  //Inicialize a struct DijkstraMinimumPath
-  initMinimumPath(&minimumPath, digraph->vertice_size, source, target);//init
   //Percorra zerando previous e setando d para -1 (custo negativo nao conta)
   for(i=0; i<minimumPath->size; i++){
     minimumPath->d[i] = -1;
@@ -135,97 +139,6 @@ MinimumPath* dijkstraAlgorithm(Digraph* digraph, int source, int target){
     }
   }
   return minimumPath;//Retorne a instancia da estrutura MinimumPath
-}
-
-/**
- * @brief: O metodo initMinimumPath inicializa a estrutura minimumPath.
- * @param:  MinimumPath**, int, int, int
- * @return: void
- */
-void initMinimumPath(MinimumPath** minimumPath, int vertice_size, int source, int target){
-  //Aloque o Caminho Minimo
-  *minimumPath  = (MinimumPath *)calloc(1, sizeof(Digraph));
-  //Verifique a alocacao de memoria
-  if(*minimumPath==NULL){
-    printf("Error [void initMinimumPath]: No memory\n");
-    exit(-1);
-  }
-  //Inicialize o Caminho Minimo
-  **minimumPath = (MinimumPath){NULL, NULL, vertice_size, source, target};
-  //Aloque memoria para os vetores
-  (*minimumPath)->d = (int *)calloc((*minimumPath)->size, sizeof(int));
-  (*minimumPath)->previous = (int *)calloc((*minimumPath)->size, sizeof(int));
-  //Verifique a alocacao de memoria
-  if((*minimumPath)->d==NULL || (*minimumPath)->previous==NULL){
-    printf("Error [void initMinimumPath]: No memory\n");
-    exit(-1);
-  }
-}
-/**
- * @brief: O metodo displayMinimumPath mostra como esta a estrutura minimumPath.
- * @param:  MinimumPath*, bool
- * @return: void
- */
-void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
-  //Verifique se existe um caminho minimo entre source e target
-  if(minimumPath->previous[minimumPath->target-1]==0){
-    printf("> Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
-    return;
-  }
-  //Declare as variaveis
-  bool hasEnded;
-  int i, currVertice, amountVertice;
-  //Obtenha o tamanho do caminho minimo
-  hasEnded = false;
-  currVertice = minimumPath->target;
-  amountVertice=0;
-  while(!hasEnded){
-    if(currVertice==minimumPath->source){
-      hasEnded = true;
-    }else{
-      currVertice = minimumPath->previous[currVertice-1];
-    }
-    amountVertice++;
-  }
-  //Armazene o caminho minimo em minPath
-  int minPath[amountVertice];
-  hasEnded = false;
-  currVertice = minimumPath->target;
-  i=amountVertice;
-  while(!hasEnded){
-    minPath[--i]=currVertice;
-    if(currVertice==minimumPath->source){
-      hasEnded = true;
-    }else{
-      currVertice = minimumPath->previous[currVertice-1];
-    }
-  }
-  //Mostre o caminho minimo
-  printf("> Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
-  for(i=0; i<amountVertice; i++){
-    printf("[%d]",minPath[i]);
-    if(i==amountVertice-1){
-      printf("\n");
-    }else{
-      printf("->");
-    }
-  }
-  //Se showVectors==true, mostre os vetores da estrutura minimumPath
-  if(showVectors){
-    printf("\n  d  -> ");
-    for(i=0; i<minimumPath->size; i++){
-      printf("[%d]", minimumPath->d[i]);
-    }
-    printf("\nprev -> ");
-    for(i=0; i<minimumPath->size; i++){
-      printf("[%d]", minimumPath->previous[i]);
-    }
-    printf("\nindex-> ");
-    for(i=0; i<minimumPath->size; i++){
-      printf("[%d]", i+1);
-    }
-    printf("\n");
-  }
 }
 /**
  * @brief: O metodo getMinimumCostArrowInBorder verifica se existe algum arco na
@@ -354,6 +267,97 @@ void displayDigraph(Digraph *digraph){
     }
   }
   printf("\n");
+}
+
+/**
+ * @brief: O metodo initMinimumPath inicializa a estrutura minimumPath.
+ * @param:  MinimumPath**, int, int, int
+ * @return: void
+ */
+void initMinimumPath(MinimumPath** minimumPath, int vertice_size, int source, int target){
+  //Aloque o Caminho Minimo
+  *minimumPath  = (MinimumPath *)calloc(1, sizeof(Digraph));
+  //Verifique a alocacao de memoria
+  if(*minimumPath==NULL){
+    printf("Error [void initMinimumPath]: No memory\n");
+    exit(-1);
+  }
+  //Inicialize o Caminho Minimo
+  **minimumPath = (MinimumPath){NULL, NULL, vertice_size, source, target};
+  //Aloque memoria para os vetores
+  (*minimumPath)->d = (int *)calloc((*minimumPath)->size, sizeof(int));
+  (*minimumPath)->previous = (int *)calloc((*minimumPath)->size, sizeof(int));
+  //Verifique a alocacao de memoria
+  if((*minimumPath)->d==NULL || (*minimumPath)->previous==NULL){
+    printf("Error [void initMinimumPath]: No memory\n");
+    exit(-1);
+  }
+}
+/**
+ * @brief: O metodo displayMinimumPath mostra como esta a estrutura minimumPath.
+ * @param:  MinimumPath*, bool
+ * @return: void
+ */
+void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
+  //Verifique se existe um caminho minimo entre source e target
+  if(minimumPath->previous[minimumPath->target-1]==0){
+    printf("> Minimum Path [%d to %d]: does not exist\n", minimumPath->source, minimumPath->target);
+    return;
+  }
+  //Declare as variaveis
+  bool hasEnded;
+  int i, currVertice, amountVertice;
+  //Obtenha o tamanho do caminho minimo
+  hasEnded = false;
+  currVertice = minimumPath->target;
+  amountVertice=0;
+  while(!hasEnded){
+    if(currVertice==minimumPath->source){
+      hasEnded = true;
+    }else{
+      currVertice = minimumPath->previous[currVertice-1];
+    }
+    amountVertice++;
+  }
+  //Armazene o caminho minimo em minPath
+  int minPath[amountVertice];
+  hasEnded = false;
+  currVertice = minimumPath->target;
+  i=amountVertice;
+  while(!hasEnded){
+    minPath[--i]=currVertice;
+    if(currVertice==minimumPath->source){
+      hasEnded = true;
+    }else{
+      currVertice = minimumPath->previous[currVertice-1];
+    }
+  }
+  //Mostre o caminho minimo
+  printf("> Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
+  for(i=0; i<amountVertice; i++){
+    printf("[%d]",minPath[i]);
+    if(i==amountVertice-1){
+      printf("\n");
+    }else{
+      printf("->");
+    }
+  }
+  //Se showVectors==true, mostre os vetores da estrutura minimumPath
+  if(showVectors){
+    printf("\n  d  -> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", minimumPath->d[i]);
+    }
+    printf("\nprev -> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", minimumPath->previous[i]);
+    }
+    printf("\nindex-> ");
+    for(i=0; i<minimumPath->size; i++){
+      printf("[%d]", i+1);
+    }
+    printf("\n");
+  }
 }
 
 /**
