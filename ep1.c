@@ -159,26 +159,26 @@ void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
   }
 
   bool hasEnded;
-  int i, j, z, currVertice;
+  int i, currVertice, amountVertice;
 
   hasEnded = false;
   currVertice = minimumPath->target;
-  i=0;
+  amountVertice=0;
   while(!hasEnded){
     if(currVertice==minimumPath->source){
       hasEnded = true;
     }else{
       currVertice = minimumPath->previous[currVertice-1];
     }
-    i++;
+    amountVertice++;
   }
 
-  int minPath[i];
+  int minPath[amountVertice];
   hasEnded = false;
   currVertice = minimumPath->target;
-  z=j=i;
+  i=amountVertice;
   while(!hasEnded){
-    minPath[--z]=currVertice;
+    minPath[--i]=currVertice;
     if(currVertice==minimumPath->source){
       hasEnded = true;
     }else{
@@ -187,9 +187,9 @@ void displayMinimumPath(MinimumPath* minimumPath, bool showVectors){
   }
 
   printf("> Minimum Path [%d to %d]: ", minimumPath->source, minimumPath->target);
-  for(i=0; i<j; i++){
+  for(i=0; i<amountVertice; i++){
     printf("[%d]",minPath[i]);
-    if(i==j-1){
+    if(i==amountVertice-1){
       printf("\n");
     }else{
       printf("->");
