@@ -1,6 +1,8 @@
 # Dijkstra Algorithm
 Implementation of Dijstra Algorithm
 
+![runDijkstra](https://user-images.githubusercontent.com/19287934/55372842-79d2b800-54d9-11e9-94ea-04f5cec57896.gif)
+
 ## Getting Started
 This repository provides an C/C++ implementation of Dijstra Algorithm
 
