@@ -266,6 +266,10 @@ void inputDigraph(Digraph *digraph, char **argv, int *source, int *target){
       printf("Error [void inputDigraph]: there is arrow from u to u, this code do not accept not simple graph\n");
       exit(-1);
     }
+    if(cost<0){
+      printf("Error [void inputDigraph]: there is negative cost, this code do not accept not graphs with negative cost\n");
+      exit(-1);
+    }
   }
   fclose(file);
   //Verifique se a quantidade de vertices e arestas coincidem
